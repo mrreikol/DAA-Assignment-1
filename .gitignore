@@ -1,0 +1,14 @@
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+.idea/
+*.iml
+*.iws
+
+.DS_Store
+Thumbs.db
+
+*.log
