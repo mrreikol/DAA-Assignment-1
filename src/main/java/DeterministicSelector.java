@@ -12,35 +12,28 @@ public class DeterministicSelector {
 
     private static int select(int[] arr, int low, int high, int k, int depth, MetricsTracker metrics) {
         metrics.updateDepth(depth);
-
-        if (low == high) {
-            return arr[low];
-        }
+        if (low == high) return arr[low];
 
         int pivot = medianOfMedians(arr, low, high, depth, metrics);
+        int[] p = partition3Way(arr, low, high, pivot, metrics);
 
-        int pivotIndex = partition(arr, low, high, pivot, metrics);
-
-        if (k == pivotIndex) {
+        if (k >= p[0] && k <= p[1]) {
             return arr[k];
-        } else if (k < pivotIndex) {
-            return select(arr, low, pivotIndex - 1, k, depth + 1, metrics);
+        } else if (k < p[0]) {
+            return select(arr, low, p[0] - 1, k, depth + 1, metrics);
         } else {
-            return select(arr, pivotIndex + 1, high, k, depth + 1, metrics);
+            return select(arr, p[1] + 1, high, k, depth + 1, metrics);
         }
     }
 
     private static int medianOfMedians(int[] arr, int low, int high, int depth, MetricsTracker metrics) {
         int n = high - low + 1;
-        if (n <= 5) {
-            return findMedian(arr, low, high, metrics);
-        }
+        if (n <= 5) return findMedian(arr, low, high, metrics);
 
         int mediansCount = 0;
         for (int i = low; i <= high; i += 5) {
             int subRight = Math.min(i + 4, high);
             findMedian(arr, i, subRight, metrics);
-
             int medianIndex = i + (subRight - i) / 2;
             swap(arr, low + mediansCount, medianIndex);
             mediansCount++;
@@ -69,24 +62,21 @@ public class DeterministicSelector {
         return arr[low + (high - low) / 2];
     }
 
-    private static int partition(int[] arr, int low, int high, int pivot, MetricsTracker metrics) {
-        for (int i = low; i <= high; i++) {
-            if (arr[i] == pivot) {
-                swap(arr, i, high);
-                break;
-            }
-        }
-
-        int i = low - 1;
-        for (int j = low; j < high; j++) {
+    private static int[] partition3Way(int[] arr, int low, int high, int pivot, MetricsTracker metrics) {
+        int lt = low;
+        int gt = high;
+        int i = low;
+        while (i <= gt) {
             metrics.incrementComparisons();
-            if (arr[j] <= pivot) {
+            if (arr[i] < pivot) {
+                swap(arr, lt++, i++);
+            } else if (arr[i] > pivot) {
+                swap(arr, i, gt--);
+            } else {
                 i++;
-                swap(arr, i, j);
             }
         }
-        swap(arr, i + 1, high);
-        return i + 1;
+        return new int[]{lt, gt};
     }
 
     private static void swap(int[] arr, int i, int j) {
