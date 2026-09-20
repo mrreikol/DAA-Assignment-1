@@ -5,7 +5,6 @@ public class QuickSorter {
 
     public static void sort(int[] arr, MetricsTracker metrics) {
         if (arr == null || arr.length <= 1) return;
-
         metrics.start();
         sort(arr, 0, arr.length - 1, 1, metrics);
         metrics.stop();
@@ -15,34 +14,40 @@ public class QuickSorter {
         while (low < high) {
             metrics.updateDepth(currentDepth);
 
-            int pivotIndex = partition(arr, low, high, metrics);
+            int[] p = partition3Way(arr, low, high, metrics);
 
-            if (pivotIndex - low < high - pivotIndex) {
-                sort(arr, low, pivotIndex - 1, currentDepth + 1, metrics);
-                low = pivotIndex + 1;
+            int leftSize = p[0] - low;
+            int rightSize = high - p[1];
+
+            if (leftSize < rightSize) {
+                sort(arr, low, p[0] - 1, currentDepth + 1, metrics);
+                low = p[1] + 1;
             } else {
-                sort(arr, pivotIndex + 1, high, currentDepth + 1, metrics);
-                high = pivotIndex - 1;
+                sort(arr, p[1] + 1, high, currentDepth + 1, metrics);
+                high = p[0] - 1;
             }
         }
     }
 
-    private static int partition(int[] arr, int low, int high, MetricsTracker metrics) {
+    private static int[] partition3Way(int[] arr, int low, int high, MetricsTracker metrics) {
         int randomPivotIndex = low + RAND.nextInt(high - low + 1);
-        swap(arr, randomPivotIndex, high);
+        int pivot = arr[randomPivotIndex];
 
-        int pivot = arr[high];
-        int i = low - 1;
+        int lt = low;
+        int gt = high;
+        int i = low;
 
-        for (int j = low; j < high; j++) {
+        while (i <= gt) {
             metrics.incrementComparisons();
-            if (arr[j] <= pivot) {
+            if (arr[i] < pivot) {
+                swap(arr, lt++, i++);
+            } else if (arr[i] > pivot) {
+                swap(arr, i, gt--);
+            } else {
                 i++;
-                swap(arr, i, j);
             }
         }
-        swap(arr, i + 1, high);
-        return i + 1;
+        return new int[]{lt, gt};
     }
 
     private static void swap(int[] arr, int i, int j) {
