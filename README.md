@@ -31,7 +31,6 @@ This project implements and analyzes four classic Divide-and-Conquer algorithms:
 *   **Execution Time:** QuickSort consistently outperformed MergeSort on random inputs due to constant factor differences and cache-friendly in-place sorting.
 *   **Recursion Depth:** The tail-recursion optimization in QuickSort kept the stack depth tightly bounded ($\le 20$ frames for 100,000 elements).
 
-*(Include generated plots here)*
 ![Time vs Size](plots/time_vs_n.png)
 ![Depth vs Size](plots/depth_vs_n.png)
 
